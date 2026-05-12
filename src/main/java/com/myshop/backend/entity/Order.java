@@ -13,12 +13,15 @@ public class Order {
     private Long id;
 
     private String name;
+
     private String phone;
+
     private String address;
 
     private Double totalAmount;
 
     private String status;
+
     private String paymentMethod;
 
     @Column(nullable = false)
@@ -27,7 +30,6 @@ public class Order {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    // 🔥 IMPORTANT (no change needed here)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
 
@@ -46,39 +48,86 @@ public class Order {
     }
 
     public void setItems(List<OrderItem> items) {
+
         this.items = items;
 
         if (items != null) {
+
             for (OrderItem i : items) {
                 i.setOrder(this);
             }
         }
     }
 
-    public List<OrderItem> getItems() { return items; }
+    public List<OrderItem> getItems() {
+        return items;
+    }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getPhone() {
+        return phone;
+    }
 
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getAddress() {
+        return address;
+    }
 
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public String getUserEmail() { return userEmail; }
-    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
