@@ -7,8 +7,6 @@ import java.util.*;
 
 import com.myshop.backend.entity.User;
 import com.myshop.backend.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import com.myshop.backend.config.JwtUtil;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,13 +16,7 @@ public class AuthController {
     @Autowired
     private UserRepository userRepo;
 
-    @Autowired
-    private BCryptPasswordEncoder encoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    // 🔐 LOGIN (ONLY ONE METHOD)
+    // 🔐 LOGIN
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody User loginData) {
 
@@ -33,16 +25,15 @@ public class AuthController {
             User user = userRepo.findByEmail(loginData.getEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            if (!encoder.matches(loginData.getPassword(), user.getPassword())) {
+            // SIMPLE PASSWORD CHECK
+            if (!user.getPassword().equals(loginData.getPassword())) {
                 throw new RuntimeException("Wrong password");
             }
-
-            String token = jwtUtil.generateToken(user.getEmail());
 
             return Map.of(
                     "email", user.getEmail(),
                     "role", user.getRole(),
-                    "token", token
+                    "token", "success"
             );
 
         } catch (Exception e) {
@@ -61,9 +52,7 @@ public class AuthController {
             return Map.of("error", "Email already exists");
         }
 
-        // 🔥 PASSWORD HASH
-        user.setPassword(encoder.encode(user.getPassword()));
-
+        // SAVE NORMAL PASSWORD
         if (user.getRole() == null) {
             user.setRole("USER");
         }
