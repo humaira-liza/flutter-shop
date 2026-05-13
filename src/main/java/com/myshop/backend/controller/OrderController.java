@@ -79,36 +79,28 @@ public class OrderController {
     @PostMapping
     public Order create(
 
-            @RequestBody Order o,
-
-            @RequestHeader(
-                    value = "Authorization",
-                    required = false
-            ) String token
+            @RequestBody Order o
     ) {
 
         try {
 
-            if (token == null ||
-                    !token.startsWith("Bearer ")) {
+            // 🔥 EMAIL FIX
+            if (o.getUserEmail() == null ||
+                    o.getUserEmail().isEmpty()) {
 
                 throw new RuntimeException(
-                        "Token missing!"
+                        "userEmail missing"
                 );
             }
 
-            token = token.replace("Bearer ", "");
-
-            String email =
-                    jwtUtil.extractEmail(token);
-
-            // 🔥 SAVE USER EMAIL
-            o.setUserEmail(email);
+            o.setUserEmail(
+                    o.getUserEmail()
+            );
 
             // 🔥 DEFAULT STATUS
             o.setStatus("NEW");
 
-            // 🔥 PAYMENT METHOD FIX
+            // 🔥 PAYMENT FIX
             if (o.getPaymentMethod() == null ||
                     o.getPaymentMethod().isEmpty()) {
 
@@ -153,14 +145,12 @@ public class OrderController {
 
                     // STOCK REDUCE
                     p.setStock(
-
                             p.getStock()
                                     - i.getQuantity()
                     );
 
                     // SOLD INCREASE
                     p.setSold(
-
                             p.getSold()
                                     + i.getQuantity()
                     );
