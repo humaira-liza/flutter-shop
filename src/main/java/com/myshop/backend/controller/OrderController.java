@@ -149,10 +149,15 @@ public class OrderController {
                                     - i.getQuantity()
                     );
 
-                    // SOLD INCREASE
+                    // SOLD INCREASE FIX
+                    Integer sold = p.getSold();
+
+                    if (sold == null) {
+                        sold = 0;
+                    }
+
                     p.setSold(
-                            p.getSold()
-                                    + i.getQuantity()
+                            sold + i.getQuantity()
                     );
 
                     productRepository.save(p);
