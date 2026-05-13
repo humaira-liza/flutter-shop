@@ -58,7 +58,7 @@ public class OrderController {
             String email =
                     jwtUtil.extractEmail(token);
 
-            // ADMIN দেখতে পারবে সব order
+            // ADMIN সব order দেখতে পারবে
             if (email.equalsIgnoreCase(
                     "admin@gmail.com")) {
 
@@ -87,77 +87,98 @@ public class OrderController {
             ) String token
     ) {
 
-        if (token == null ||
-                !token.startsWith("Bearer ")) {
+        try {
+
+            if (token == null ||
+                    !token.startsWith("Bearer ")) {
+
+                throw new RuntimeException(
+                        "Token missing!"
+                );
+            }
+
+            token = token.replace("Bearer ", "");
+
+            String email =
+                    jwtUtil.extractEmail(token);
+
+            // 🔥 SAVE USER EMAIL
+            o.setUserEmail(email);
+
+            // 🔥 DEFAULT STATUS
+            o.setStatus("NEW");
+
+            // 🔥 PAYMENT METHOD FIX
+            if (o.getPaymentMethod() == null ||
+                    o.getPaymentMethod().isEmpty()) {
+
+                o.setPaymentMethod("COD");
+            }
+
+            // 🔥 ITEMS PROCESS
+            if (o.getItems() != null) {
+
+                o.getItems().forEach(i -> {
+
+                    Product p =
+                            productRepository.findById(
+                                            i.getProductId()
+                                    )
+                                    .orElseThrow(
+                                            () -> new RuntimeException(
+                                                    "Product not found"
+                                            )
+                                    );
+
+                    // PRODUCT INFO
+                    i.setProductName(
+                            p.getName()
+                    );
+
+                    i.setPrice(
+                            p.getPrice()
+                    );
+
+                    i.setOrder(o);
+
+                    // STOCK CHECK
+                    if (p.getStock()
+                            < i.getQuantity()) {
+
+                        throw new RuntimeException(
+                                "Out of stock for: "
+                                        + p.getName()
+                        );
+                    }
+
+                    // STOCK REDUCE
+                    p.setStock(
+
+                            p.getStock()
+                                    - i.getQuantity()
+                    );
+
+                    // SOLD INCREASE
+                    p.setSold(
+
+                            p.getSold()
+                                    + i.getQuantity()
+                    );
+
+                    productRepository.save(p);
+                });
+            }
+
+            return repo.save(o);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
 
             throw new RuntimeException(
-                    "Token missing!"
+                    e.getMessage()
             );
         }
-
-        token = token.replace("Bearer ", "");
-
-        String email =
-                jwtUtil.extractEmail(token);
-
-        o.setUserEmail(email);
-
-        o.setStatus("NEW");
-
-        if (o.getItems() != null) {
-
-            o.getItems().forEach(i -> {
-
-                Product p =
-                        productRepository.findById(
-                                        i.getProductId()
-                                )
-                                .orElseThrow(
-                                        () -> new RuntimeException(
-                                                "Product not found"
-                                        )
-                                );
-
-                // PRODUCT INFO SAVE
-                i.setProductName(
-                        p.getName()
-                );
-
-                i.setPrice(
-                        p.getPrice()
-                );
-
-                i.setOrder(o);
-
-                // STOCK CHECK
-                if (p.getStock()
-                        < i.getQuantity()) {
-
-                    throw new RuntimeException(
-                            "Out of stock for: "
-                                    + p.getName()
-                    );
-                }
-
-                // STOCK REDUCE
-                p.setStock(
-
-                        p.getStock()
-                                - i.getQuantity()
-                );
-
-                // SOLD INCREASE
-                p.setSold(
-
-                        p.getSold()
-                                + i.getQuantity()
-                );
-
-                productRepository.save(p);
-            });
-        }
-
-        return repo.save(o);
     }
 
     // 🔁 STATUS UPDATE
@@ -207,7 +228,6 @@ public class OrderController {
                         )
                 );
 
-        // ONLY EDITABLE
         o.setName(updated.getName());
 
         o.setPhone(updated.getPhone());

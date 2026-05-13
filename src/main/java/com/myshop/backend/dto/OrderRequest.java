@@ -12,7 +12,6 @@ public class OrderRequest {
 
     public Double totalAmount;
 
-    // 🔥 ADD THIS
     public String paymentMethod;
 
     public List<OrderItemRequest> items;
